@@ -1,5 +1,8 @@
 import React from "react";
 import { Todo } from "./types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import dayjs from "dayjs";
 
 type Props = {
   todo: Todo;
@@ -9,6 +12,17 @@ type Props = {
 
 const TodoItem = (props: Props) => {
   const todo = props.todo;
+
+  // 現在の日付を取得
+  const currentDate = new Date();
+  const dueDate = todo.deadline ? new Date(todo.deadline) : null;
+
+  // 期日が過ぎているかをチェック
+  const isOverdue = dueDate && dueDate < currentDate;
+
+  // 優先度を基に星の数を表示
+  const priorityStars = "★".repeat(todo.priority); // 優先度に応じて☆の数を表示（例: 1～3）
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center">
@@ -18,9 +32,22 @@ const TodoItem = (props: Props) => {
           onChange={(e) => props.updateIsDone(todo.id, e.target.checked)}
           className="mr-1.5 cursor-pointer"
         />
-        {todo.name}
+        <span
+          className={`
+            ${todo.isDone ? "line-through text-gray-400" : ""}
+            ${isOverdue ? "text-red-500" : ""}
+          `}
+        >
+          {todo.name}
+        </span>
+        {/* 期日が過ぎている場合は💀マークを表示 */}
+        {isOverdue && (
+          <span className="text-red-500 ml-2">💀</span>
+        )}
       </div>
-      <div>
+      <div className="flex items-center">
+        {/* 優先度の表示 */}
+        <span className="mr-2">{priorityStars}</span>
         <button
           onClick={() => props.remove(todo.id)}
           className="rounded-md bg-slate-200 px-2 py-1 text-sm font-bold text-white hover:bg-red-500"
@@ -28,74 +55,15 @@ const TodoItem = (props: Props) => {
           削除
         </button>
       </div>
+
+      {/* 期限の表示：期日がある場合は表示し、過ぎていれば赤文字にする */}
+      {dueDate && (
+        <div className={isOverdue ? "text-red-500" : ""} style={{ fontSize: "0.875rem" }}>
+          <span>期限: {dayjs(dueDate).format("YYYY-MM-DD HH:mm")}</span>
+        </div>
+      )}
     </div>
   );
 };
 
 export default TodoItem;
-
-
-
-//   return (
-//     <div className="space-y-2">
-//       {todos.map((todo) => (
-//         <div
-//           key={todo.id}
-//           className={twMerge(
-//             "rounded-md border border-slate-500 bg-white px-3 py-2 drop-shadow-md",
-//             todo.isDone && "bg-blue-50 opacity-50"
-//           )}
-//         >
-//           {todo.isDone && (
-//             <div className="mb-1 rounded bg-blue-400 px-2 py-0.5 text-center text-xs text-white">
-//               <FontAwesomeIcon icon={faFaceGrinWide} className="mr-1.5" />
-//               完了済み
-//               <FontAwesomeIcon icon={faFaceGrinWide} className="ml-1.5" />
-//             </div>
-//               )}
-//           <div className="flex items-baseline text-slate-700">
-//               <FontAwesomeIcon icon={faFile} flip="horizontal" className="mr-1" />
-//             <input
-//               type="checkbox"
-//               checked={todo.isDone}
-//               onChange={(e) => props.updateIsDone(todo.id, e.target.checked)}
-//               className="mr-1.5 cursor-pointer"
-//             />
-//             <div
-//               className={twMerge(
-//                 "text-lg font-bold",
-//                 todo.isDone && "line-through decoration-2"
-//               )}
-//                   >
-//               {todo.name}
-//             </div>
-//             <div className="ml-2">優先度 </div>
-//             <div className="ml-2 text-orange-400">
-//               {num2star(todo.priority)}
-//             </div>
-//           </div>
-//           {todo.deadline && (
-//             <div className="ml-4 flex items-center text-sm text-slate-500">
-//               <FontAwesomeIcon
-//                 icon={faClock}
-//                 flip="horizontal"
-//                 className="mr-1.5"
-//               />
-//               <div className={twMerge(todo.isDone && "line-through")}>
-//                 期限: {dayjs(todo.deadline).format("YYYY年M月D日 H時m分")}
-//             </div>
-//             <button
-//                 onClick={() => props.remove(todo.id)}
-//                 className="rounded-md bg-slate-200 px-2 py-1 text-sm font-bold text-white hover:bg-red-500"
-//                 >
-//                   削除
-//             </button> 
-//             </div>
-//           )}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default Todoitem;
